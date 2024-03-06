@@ -1,0 +1,18 @@
+{
+  "IsEncrypted": false,
+  "Values": {
+    "AzureWebJobsStorage": "",
+    "FUNCTIONS_WORKER_RUNTIME": "python",
+    "AzureWebJobsFeatureFlags": "EnableWorkerIndexing",
+    "AZURE_OPENAI_API_KEY": "",
+    "AZURE_OPENAI_API_ENDPOINT": "",
+    "AZURE_OPENAI_DEPLOYMENT_NAME": "",
+    "AZURE_OPENAI_DEPLOYMENT_NAME_TEXT": "",
+    "AZURE_OPENAI_API_VERSION": "2024-02-15-preview",
+    "BING_SEARCH_API_KEY": "",
+    "COSMOS_DB_CONN_STRING": "",
+    "COSMOS_DB_DATABASE": "",
+    "COSMOS_DB_CONTAINER": "",
+    "FUNCTIONS_EXTENSION_VERSION": "~4"
+  }
+}
