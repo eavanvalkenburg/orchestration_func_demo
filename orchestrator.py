@@ -1,3 +1,14 @@
+import os
+from semantic_kernel import Kernel
+from semantic_kernel.connectors.ai.open_ai import AzureChatCompletion
+from semantic_kernel.contents.chat_history import ChatHistory
+
+import logging
+
+from cosmos_chat_history import CosmosChatHistory
+
+logger = logging.getLogger(__name__)
+
 SYSTEM_MESSAGE = """
 You are a chat bot. Your name is Mosscap and
 you have one goal: figure out what people need.
@@ -7,67 +18,60 @@ effectively, but you tend to answer with long
 flowery prose.
 """
 
-class Orchetrator:
-    def __init__():
+
+class Orchestrator:
+    def __init__(self):
 
         # Create a Kernel
         self.kernel = Kernel()
 
         # Define a service ID that ties to the AI service
-        service_id = "chat-gpt"
         chat_service = AzureChatCompletion(
-            service_id=service_id, **azure_openai_settings_from_dot_env_as_dict(include_api_version=True)
+            service_id="gpt-4",
+            deployment_name=os.environ["AZURE_OPENAI_DEPLOYMENT_NAME"],
+            api_key=os.environ["AZURE_OPENAI_API_KEY"],
+            endpoint=os.environ["AZURE_OPENAI_API_ENDPOINT"],
+            api_version=os.environ["AZURE_OPENAI_API_VERSION"],
         )
-
         # Add the AI service to the kernel
         self.kernel.add_service(chat_service)
 
-        # Get the Prompt Execution Settings
-        req_settings = self.kernel.get_service(service_id).instantiate_prompt_execution_settings(
-            service_id=service_id, 
-            max_tokens=2000,
-            temperature=0.7,
-            top_p=0.8,
-        )
-
-        # Create the prompt template config and specify any required input variables
-        prompt_template_config = PromptTemplateConfig(
-            template={{$chat_history}},
-            name="chat",
-            input_variables=[
-                                InputVariable(name="chat_history", description="The history of the conversation", is_required=True),
-            ],
-            execution_settings=req_settings, # The execution settings will be tied to the configured service_id
-        )
-
         # Create the chat function from the prompt template config
         self.chat_function = self.kernel.create_function_from_prompt(
+            prompt="{{$chat_history}}",
             plugin_name="chat_bot",
             function_name="chat",
-            prompt_template_config=prompt_template_config
+            prompt_execution_settings=chat_service.instantiate_prompt_execution_settings(
+                service_id="gpt-4",
+                max_tokens=2000,
+                temperature=0.7,
+                top_p=0.8,
+            ),
         )
         # Define a chat history object
-        self.history = ChatHistory(system_message=system_message)
+        self.cosmos_chat_history = CosmosChatHistory()
+        self.history = ChatHistory(system_message=SYSTEM_MESSAGE)
 
-    async def load_history():
+    async def load_history(self, user_id, session_id):
+        history = await self.cosmos_chat_history.load_history(user_id, session_id)
+        if history:
+            self.history = history
 
-        # Add the desired messages
-        self.history.add_user_message("Hi there, who are you?")
-        self.history.add_assistant_message("I am Mosscap, a chat bot. I'm trying to figure out what people need.")
+    async def store_history(self, user_id, session_id):
+        await self.cosmos_chat_history.save_history(user_id, session_id, self.history)
 
-    async def store_history():
-    
-
-    async def invoke(user_input):
+    async def invoke(self, user_input):
         self.history.add_user_message(user_input)
-        # Invoke the chat function, passing the kernel arguments as kwargs
-        response = await kernel.invoke(
-            chat_function,
+        response = await self.kernel.invoke(
+            self.chat_function,
             chat_history=self.history,
         )
+        logger.debug(f"{response=}")
+        self.history.add_message(response.value[0])
 
-        # View the response
-        print(f"Mosscap:> {response}")
-        
-        self.history.add_assistant_message(str(response))
+    async def __aenter__(self):
+        await self.cosmos_chat_history.__aenter__()
+        return self
 
+    async def __aexit__(self, exc_type, exc_val, exc_tb):
+        await self.cosmos_chat_history.__aexit__(exc_type, exc_val, exc_tb)

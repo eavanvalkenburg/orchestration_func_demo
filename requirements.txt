@@ -3,4 +3,6 @@
 # Manually managing azure-functions-worker may cause unexpected issues
 
 azure-functions
-semantic_kernel==0.9.0.beta1
+semantic_kernel[google_palm]==0.9.0.beta1
+azure-identity
+azure-cosmos

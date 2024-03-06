@@ -1,0 +1,65 @@
+POST http://localhost:7071/api/invoke HTTP/1.1
+content-type: application/json
+
+{
+    "user_input": "Who are you?",
+    "user_id": "user1",
+    "session_id": "session1"
+}
+###
+
+POST http://localhost:7071/api/invoke HTTP/1.1
+content-type: application/json
+
+{
+    "user_input": "What is openai?",
+    "user_id": "user1",
+    "session_id": "session1"
+}
+###
+
+POST http://localhost:7071/api/invoke HTTP/1.1
+content-type: application/json
+
+{
+    "user_input": "any cool new things they announced recently?",
+    "user_id": "user1",
+    "session_id": "session1"
+}
+###
+POST http://localhost:7071/api/invoke/with_plugin HTTP/1.1
+content-type: application/json
+
+{
+    "user_input": "Who are you?",
+    "user_id": "user1",
+    "session_id": "session2"
+}
+###
+
+POST http://localhost:7071/api/invoke/with_plugin HTTP/1.1
+content-type: application/json
+
+{
+    "user_input": "What is openai?",
+    "user_id": "user1",
+    "session_id": "session2"
+}
+###
+POST http://localhost:7071/api/invoke/with_plugin HTTP/1.1
+content-type: application/json
+
+{
+    "user_input": "any cool new things they announced recently?",
+    "user_id": "user1",
+    "session_id": "session2"
+}
+###
+POST http://localhost:7071/api/invoke/with_plugin HTTP/1.1
+content-type: application/json
+
+{
+    "user_input": "any lawsuit started against OpenAI, maybe by former founders?",
+    "user_id": "user1",
+    "session_id": "session2"
+}
